@@ -1,33 +1,23 @@
-﻿//using CodyDocs.Events;
+﻿//using System;
+//using System.ComponentModel.Composition;
+//using CodyDocs.EditorUI.DocumentedCodeHighlighter;
 //using Microsoft.VisualStudio.Text;
 //using Microsoft.VisualStudio.Text.Editor;
-//using Microsoft.VisualStudio.Text.Operations;
 //using Microsoft.VisualStudio.Text.Tagging;
 //using Microsoft.VisualStudio.Utilities;
-//using System;
-//using System.ComponentModel.Composition;
 
-//namespace CodyDocs.EditorUI.DocumentedCodeHighlighter
+//namespace CodyDocs.EditorUI.DocumentedCodeEditCodeLang
 //{
-//    //[Export]
-//    //[Export(typeof(IViewTaggerProvider))]
+//    [Export(typeof(IViewTaggerProvider))]
 //    [ContentType("code")]
-//    [TagType(typeof(HighlightTag))]
-//    public class HighlightTaggerProvider : IViewTaggerProvider
+//    [TagType(typeof(DocumentationTag))]
+//    internal sealed class EditDocumentationCodeLangTaggerProvider : IViewTaggerProvider
 //    {
+            
 //#pragma warning disable 649 // "field never assigned to" -- field is set by MEF.
 //        [Import]
 //        internal IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService;
-//        private IEventAggregator _eventAggregator;
-
 //#pragma warning restore 649
-
-//        [ImportingConstructor]
-//        public HighlightTaggerProvider(IEventAggregator eventAggregator)
-//        {
-//            _eventAggregator = eventAggregator;
-//        }
-
 
 //        public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
 //        {
@@ -40,11 +30,11 @@
 //            if (buffer != textView.TextBuffer)
 //                return null;
 
-//            ITagAggregator<DocumentationTag> tagAggregator =
+//            ITagAggregator<DocumentationTag> tagAggregator = 
 //                ViewTagAggregatorFactoryService.CreateTagAggregator<DocumentationTag>(textView);
 
-//            return textView.Properties.GetOrCreateSingletonProperty(() =>
-//                new HighlightTagger((IWpfTextView)textView, tagAggregator, _eventAggregator) as ITagger<T>);
+//            return textView.Properties.GetOrCreateSingletonProperty(() => 
+//                new EditDocumentationCodeLangTagger((IWpfTextView)textView, tagAggregator) as ITagger<T>);
 //        }
 //    }
 //}

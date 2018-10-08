@@ -94,6 +94,7 @@ namespace CodyDocs
         {
             TextViewSelection selection = GetSelection(ServiceProvider);
             string activeDocumentPath = GetActiveDocumentFilePath(ServiceProvider);
+            
             ShowAddDocumentationWindow(activeDocumentPath, selection);
         }
 
@@ -113,12 +114,51 @@ namespace CodyDocs
 
         private TextViewSelection GetSelection(IServiceProvider serviceProvider)
         {
+            
             var service = serviceProvider.GetService(typeof(SVsTextManager));
             var textManager = service as IVsTextManager2;
             IVsTextView view;
             int result = textManager.GetActiveView2(1, null, (uint)_VIEWFRAMETYPE.vftCodeWindow, out view);
-
             view.GetSelection(out int startLine, out int startColumn, out int endLine, out int endColumn);//end could be before beginning
+
+            var hiddenTextManager = serviceProvider.GetService(typeof(SVsTextManager)) as IVsHiddenTextManager;
+            IVsHiddenTextSession hiddenSession = null;
+            IVsTextLines lines = null;
+            IVsEnumHiddenRegions[] hiddenRegions = null;
+            view.GetBuffer(out lines);
+            int hRetVal = hiddenTextManager.GetHiddenTextSession(
+                             lines,
+                             out hiddenSession);
+            if (hRetVal != 0)
+            {
+                hRetVal = hiddenTextManager.CreateHiddenTextSession(
+                             0,
+                             lines,
+                             null,
+                             out hiddenSession);
+                //if (hRetVal != 0)
+                //    return null;
+            }
+
+            if (hiddenSession != null)
+            {
+                var hidRegion = new NewHiddenRegion()
+                {
+                    dwBehavior = (uint)HIDDEN_REGION_BEHAVIOR.hrbClientControlled,
+                    dwState = (uint)HIDDEN_REGION_STATE.hrsDefault,
+                    iType = (int)HIDDEN_REGION_TYPE.hrtConcealed,
+                    pszBanner = "Testing!!",
+                    tsHiddenText = new TextSpan()
+                    {
+                        iStartLine = startLine,
+                        iStartIndex = startColumn,
+                        iEndLine = endLine,
+                        iEndIndex = endColumn
+                    }
+                };
+                hiddenSession.AddHiddenRegions(0, 1, new[] { hidRegion }, hiddenRegions);
+            }
+
 
             int ok = view.GetNearestPosition(startLine, startColumn, out int position1, out int piVirtualSpaces);
             ok = view.GetNearestPosition(endLine, endColumn, out int position2, out piVirtualSpaces);

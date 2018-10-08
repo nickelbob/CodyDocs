@@ -1,90 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using CodyDocs.EditorUI.AdornmentSupport;
-using CodyDocs.EditorUI.DocumentedCodeHighlighter;
-using CodyDocs.Events;
-using CodyDocs.Utils;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
+﻿//using System;
+//using System.Collections.Generic;
+//using CodyDocs.EditorUI.AdornmentSupport;
+//using CodyDocs.EditorUI.DocumentedCodeHighlighter;
+//using CodyDocs.Utils;
+//using Microsoft.VisualStudio.Text;
+//using Microsoft.VisualStudio.Text.Editor;
+//using Microsoft.VisualStudio.Text.Tagging;
 
-namespace CodyDocs.EditorUI.DocumentedCodeEditIntraTextAdornment
-{
-    
-    internal sealed class EditDocumentationAdornmentTagger : IntraTextAdornmentTagger<DocumentationTag, YellowNotepadAdornment>
-    {
-        private ITagAggregator<DocumentationTag> _tagAggregator;
-        private ITextBuffer _buffer;
-        private string _codyDocsFilename;
+//namespace CodyDocs.EditorUI.DocumentedCodeEditIntraTextAdornment
+//{
 
-        public EditDocumentationAdornmentTagger(IWpfTextView view, ITagAggregator<DocumentationTag> tagAggregator)
-            : base(view)
-        {
-            this._tagAggregator = tagAggregator;
-            _tagAggregator.TagsChanged += OnTagsChanged;
-            _buffer = view.TextBuffer;
-            _codyDocsFilename = view.TextBuffer.GetCodyDocsFileName();
+//    internal sealed class EditDocumentationAdornmentTagger : IntraTextAdornmentTagger<DocumentationTag, YellowNotepadAdornment>
+//    {
+//        private ITagAggregator<DocumentationTag> _tagAggregator;
+//        private ITextBuffer _buffer;
+//        private string _codyDocsFilename;
 
-        }
+//        public EditDocumentationAdornmentTagger(IWpfTextView view, ITagAggregator<DocumentationTag> tagAggregator)
+//            : base(view)
+//        {
+//            this._tagAggregator = tagAggregator;
+//            _tagAggregator.TagsChanged += OnTagsChanged;
+//            _buffer = view.TextBuffer;
+//            _codyDocsFilename = view.TextBuffer.GetCodyDocsFileName();
 
-        private void OnTagsChanged(object sender, TagsChangedEventArgs e)
-        {
-            var snapshotSpan = e.Span.GetSnapshotSpan();//Extension method
-            InvokeTagsChanged(sender, new SnapshotSpanEventArgs(snapshotSpan));
+//        }
 
-        }
-        
-        public void Dispose()
-        {
-            _tagAggregator.Dispose();
+//        private void OnTagsChanged(object sender, TagsChangedEventArgs e)
+//        {
+//            var snapshotSpan = e.Span.GetSnapshotSpan();//Extension method
+//            InvokeTagsChanged(sender, new SnapshotSpanEventArgs(snapshotSpan));
 
-            view.Properties.RemoveProperty(typeof(EditDocumentationAdornmentTagger));
-        }
+//        }
 
-        // To produce adornments that don't obscure the text, the adornment tags
-        // should have zero length spans. Overriding this method allows control
-        // over the tag spans.
-        protected override IEnumerable<Tuple<SnapshotSpan, PositionAffinity?, DocumentationTag>> GetAdornmentData(NormalizedSnapshotSpanCollection spans)
-        {
-            if (spans.Count == 0)
-                yield break;
+//        public void Dispose()
+//        {
+//            _tagAggregator.Dispose();
 
-            ITextSnapshot snapshot = spans[0].Snapshot;
+//            view.Properties.RemoveProperty(typeof(EditDocumentationAdornmentTagger));
+//        }
 
-            var commentTags = _tagAggregator.GetTags(spans);
+//        // To produce adornments that don't obscure the text, the adornment tags
+//        // should have zero length spans. Overriding this method allows control
+//        // over the tag spans.
+//        protected override IEnumerable<Tuple<SnapshotSpan, PositionAffinity?, DocumentationTag>> GetAdornmentData(NormalizedSnapshotSpanCollection spans)
+//        {
+//            if (spans.Count == 0)
+//                yield break;
 
-            foreach (IMappingTagSpan<DocumentationTag> commentTag in commentTags)
-            {
-                NormalizedSnapshotSpanCollection colorTagSpans = commentTag.Span.GetSpans(snapshot);
+//            ITextSnapshot snapshot = spans[0].Snapshot;
 
-                // Ignore data tags that are split by projection.
-                // This is theoretically possible but unlikely in current scenarios.
-                if (colorTagSpans.Count != 1)
-                    continue;
-                if (commentTag.Span.GetSpan().Length == 0)
-                    continue;
+//            var commentTags = _tagAggregator.GetTags(spans);
 
-                SnapshotSpan adornmentSpan = new SnapshotSpan(colorTagSpans[0].End, 0);
+//            foreach (IMappingTagSpan<DocumentationTag> commentTag in commentTags)
+//            {
+//                NormalizedSnapshotSpanCollection colorTagSpans = commentTag.Span.GetSpans(snapshot);
+
+//                // Ignore data tags that are split by projection.
+//                // This is theoretically possible but unlikely in current scenarios.
+//                if (colorTagSpans.Count != 1)
+//                    continue;
+//                if (commentTag.Span.GetSpan().Length == 0)
+//                    continue;
+
+//                SnapshotSpan adornmentSpan = new SnapshotSpan(colorTagSpans[0].End, 0);
                 
 
-                yield return Tuple.Create(adornmentSpan, (PositionAffinity?)PositionAffinity.Successor, commentTag.Tag);
-            }
-        }
+//                yield return Tuple.Create(adornmentSpan, (PositionAffinity?)PositionAffinity.Successor, commentTag.Tag);
+//            }
+//        }
 
-        protected override YellowNotepadAdornment CreateAdornment(DocumentationTag additionalData, SnapshotSpan span)
-        {
-            return new YellowNotepadAdornment()
-            {
-                DocumentationTag = additionalData,
-                Buffer = _buffer
-            };
-        }
+//        protected override YellowNotepadAdornment CreateAdornment(DocumentationTag additionalData, SnapshotSpan span)
+//        {
+//            return new YellowNotepadAdornment()
+//            {
+//                DocumentationTag = additionalData,
+//                Buffer = _buffer
+//            };
+//        }
 
-        protected override bool UpdateAdornment(YellowNotepadAdornment adornment, DocumentationTag additionalData)
-        {
-            //adornment.Update(additionalData);
-            return false;
-        }
-    }
+//        protected override bool UpdateAdornment(YellowNotepadAdornment adornment, DocumentationTag additionalData)
+//        {
+//            //adornment.Update(additionalData);
+//            return false;
+//        }
+//    }
 
-}
+//}

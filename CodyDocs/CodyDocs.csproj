@@ -55,6 +55,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dialogs\EditDocumentationViewModel.cs" />
+    <Compile Include="EditorUI\DocumentedCodeEditCodeLang\EditDocumentationCodeLangTagger.cs" />
+    <Compile Include="EditorUI\DocumentedCodeEditCodeLang\EditDocumentationCodeLangTaggerProvider.cs" />
     <Compile Include="EditorUI\DocumentedCodeEditIntraTextAdornment\EditDocumentationAdornmentTagger.cs" />
     <Compile Include="EditorUI\DocumentedCodeEditIntraTextAdornment\EditDocumentationAdornmentTaggerProvider.cs" />
     <Compile Include="EditorUI\AdornmentSupport\IntraTextAdornmentTagger.cs" />
